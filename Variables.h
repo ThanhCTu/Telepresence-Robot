@@ -29,8 +29,8 @@
 #define WHEEL_RADIUS      12
 #define SET_SPEED         1.0//WHEEL_RADIUS  //rps
 #define TICK_PER_REVOLUTION 250
-#define TIME_FRAME       1000000                     //in us ( 100,000 us = 100 ms)
-#define KP                0.1
+#define TIME_FRAME       50000                     //in us ( 100,000 us = 100 ms)
+#define KP                1
 #define KI                0
 #define KD                0
 #define ONE_SECOND       1000000   //1s = 1,000,000 us

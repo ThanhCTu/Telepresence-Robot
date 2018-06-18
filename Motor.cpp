@@ -84,8 +84,8 @@ void Motor::Calculate_Speed()
 	encoder.Velocity = (double) abs(encoder.Position);   //in us
 	Limit_Speed(encoder.Velocity,encoder.Pre_Velocity);
 	encoder.Pre_Velocity = encoder.Velocity;
-//  Serial.println("Position: ");
-//  Serial.println(encoder.Position);
+  Serial.println("Position: ");
+  Serial.println(encoder.Position);
 	Set_Speed(output);
 
 	//Reset Position

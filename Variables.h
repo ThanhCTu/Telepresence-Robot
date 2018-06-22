@@ -37,5 +37,4 @@
 #define LENGTH_OF_TWO_WHEELS    50 //units : centimeter  (the length of two wheels)
 //const double Max_Speed = 0.8;                              //Max Speed = 3 m/s => 3 puls/ms
 
-
 #endif /* VARIABLES_H_ */

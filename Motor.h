@@ -36,6 +36,7 @@ public:
 	void TickPerRevolution();
 	void Set_Speed(double);
 	void Begin(int,int,int,int,int,bool);
+
   double Speed(double,double);
   double Convert_Speed_To_TickPerSecond(double);
   void Direction(double);
@@ -43,6 +44,7 @@ public:
 	Encoder encoder;
 	double Acc_Limit = 0;
 	double MAX_Tick_Per_Rev = 0;
+
 	int current_speed;
 	double input = 0, output = 0, setpoint = 0;
 private:

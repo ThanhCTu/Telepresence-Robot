@@ -36,29 +36,40 @@ void Motor::Begin(int encodA,int encodB, int MotorEnable_1, int MotorEnable_2, i
   _motor = motor;
 
   TickPerRevolution();
+
   setpoint = MAX_Tick_Per_Rev;
+
 }
 
 
 void Motor::TickPerRevolution()
 {
 
+
   MAX_Tick_Per_Rev = Convert_Speed_To_TickPerSecond(MAX_SPEED);
 
   //Limit Acceleration
   Acc_Limit = Convert_Speed_To_TickPerSecond(ACC_MAX);
+
+  Serial.print("TickperRev: ");
+  Serial.println(MAX_Tick_Per_Rev);
+
+
 }
 
 void Motor::Limit_Speed(double Final_Vel, double Init_Vel)
 {
+
   //Invert Acc_Limit if the TR goes backward
   if(Final_Vel - Init_Vel > Acc_Limit)
         encoder.Velocity = Init_Vel + Acc_Limit;
-
 }
 
 void Motor::Interrupt()
 {
+
+  //double Motor::counter = 0;
+
     if (digitalRead(Pin._encodB) == HIGH)             encoder.Position++;           // if (digitalRead(encodPinB1)==HIGH)  count ++; (if PINB1 &0b00000001)
     else                                          	  encoder.Position--;             // if (digitalRead(encodPinB1)==LOW)   count --;
 
@@ -71,6 +82,7 @@ void Motor::Calculate_Speed()
 	Limit_Speed(encoder.Velocity,encoder.Pre_Velocity);
 	encoder.Pre_Velocity = encoder.Velocity;
   //Set the PWM
+
 	Set_Speed(output);
   
 
@@ -93,12 +105,21 @@ void Motor::Set_Speed(double Calculated_PID)
   //Write pwm to PWM pin
   analogWrite(Pin._PWM_Pin,current_speed);
 
+
+//    Serial.print("Current: ");
+//    Serial.println(current_speed);
+//    Serial.print("Position: ");
+//    Serial.println(encoder.Position);
+
+
 }
 
 void Motor::Compute_PID(PID myPID)
 {
+
   //Limit_Speed(encoder.Velocity,encoder.Pre_Velocity);
   //Serial.print(encoder.Velocity);Serial.print("\t");
+
   input = abs(encoder.Velocity);
   myPID.Compute();
   //Serial.println(current_speed);
@@ -162,4 +183,5 @@ void Motor::SetUpPID(PID &myPID)
   myPID.SetOutputLimits(-255, 255);
   
 }
+
 

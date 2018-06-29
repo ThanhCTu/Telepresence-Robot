@@ -31,12 +31,11 @@
 #define SET_SPEED         1.0//WHEEL_RADIUS  //rps
 #define TICK_PER_REVOLUTION 250
 #define TIME_FRAME       50000                     //in us ( 100,000 us = 100 ms)
-#define KP                1
+#define KP                1     // 0.1
 #define KI                0
-#define KD                0
+#define KD                20    //2
 #define ONE_SECOND       1000000   //1s = 1,000,000 us
 #define LENGTH_OF_TWO_WHEELS    50 //units : centimeter  (the length of two wheels)
 //const double Max_Speed = 0.8;                              //Max Speed = 3 m/s => 3 puls/ms
-
 
 #endif /* VARIABLES_H_ */

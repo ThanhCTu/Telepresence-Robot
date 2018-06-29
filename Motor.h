@@ -40,7 +40,7 @@ public:
   double Speed(double,double);
   double Convert_Speed_To_TickPerSecond(double);
   void Direction(double);
-  void SetUpPID(PID);
+  void SetUpPID(PID &myPID);
 	Encoder encoder;
 	double Acc_Limit = 0;
 	double MAX_Tick_Per_Rev = 0;

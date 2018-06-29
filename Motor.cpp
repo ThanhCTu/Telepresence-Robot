@@ -72,6 +72,7 @@ void Motor::Calculate_Speed()
 	encoder.Pre_Velocity = encoder.Velocity;
   //Set the PWM
 	Set_Speed(output);
+  
 
 	//Reset Position
 	encoder.Position = 0;
@@ -97,8 +98,10 @@ void Motor::Set_Speed(double Calculated_PID)
 void Motor::Compute_PID(PID myPID)
 {
   //Limit_Speed(encoder.Velocity,encoder.Pre_Velocity);
+  //Serial.print(encoder.Velocity);Serial.print("\t");
   input = abs(encoder.Velocity);
   myPID.Compute();
+  //Serial.println(current_speed);
 }
 double Motor::Speed(double left, double right)
 {

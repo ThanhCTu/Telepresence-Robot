@@ -9,7 +9,7 @@ PID leftPID(&motor_left.input,&motor_left.output,&motor_left.setpoint,KP,KD,KI,D
 String CommandOfTablet = "";
 String left = "";
 String right = "";
-int Received_Command;
+char Received_Command;
 void setup() {
   
   Serial.begin(9600);
@@ -28,16 +28,21 @@ void setup() {
   Timer1.attachInterrupt( timer_interrupt);
   Serial.println(motor_right.MAX_Tick_Per_Rev);
   Serial.println("Ready");
-
+  motor_right.Speed(0,0);
+//*/
 }
+float test = 0;
 void loop() {
   // put your main code here, to run repeatedly:
-  
+
+
+
+//motor_right.Speed(2.2,2.2);
   Read_Command();
   
   motor_right.Compute_PID(rightPID);
    //motor_left.Compute_PID(leftPID);
-  
+  //*/
 }
 void isr()
 {
@@ -50,25 +55,31 @@ void isrB()
 void timer_interrupt()
 {
   motor_right.Calculate_Speed();
+  
   //motor_left.Calculate_Speed();
 }
 void Read_Command()
 {
   if(Serial.available()>0)
   {
-    //Serial.println("Let's go");
     while(Serial.available())
     {
       Received_Command = Serial.read();
-      CommandOfTablet += (char) Received_Command;
-    
-      delay(5);
+      if(Received_Command=='e')
+      {
+        Serial.println("break");
+        break;
+      }
+      Serial.println((int)Received_Command);
+      CommandOfTablet += Received_Command;
+      
+      delay(1);
+      
     }
   
     if(CommandOfTablet.length())
     {
       int _beg = CommandOfTablet.indexOf("l");
-    
       int _end = CommandOfTablet.indexOf("r");
     
       if( _beg != -1 && _end != -1)
@@ -76,10 +87,14 @@ void Read_Command()
         left = CommandOfTablet.substring(_beg + 1, _end);
         right = CommandOfTablet.substring(_end + 1, CommandOfTablet.length());
       }
+       
       motor_right.Speed(left.toDouble(),right.toDouble());
+    
     }
 
     CommandOfTablet = "";
+    //Serial.print(left);Serial.print("\t");
+    //Serial.println(right);
   }
   
 }

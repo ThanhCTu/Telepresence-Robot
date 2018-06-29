@@ -25,7 +25,9 @@ struct PIN
 		int _MotorEnable_2;
 		int _PWM_Pin;
 	};
-class Motor {
+
+class Motor 
+{
 public:
 	Motor();
 	virtual ~Motor();
@@ -34,12 +36,20 @@ public:
 	void Interrupt();
 	void Limit_Speed(double,double);
 	void TickPerRevolution();
-	void Set_Speed(double);
+	void Write_PWM(double);
 	void Begin(int,int,int,int,int,bool);
-  double Speed(double,double);
+  double Speed(double);
   double Convert_Speed_To_TickPerSecond(double);
   void Direction(double);
   void SetUpPID(PID &myPID);
+
+  //Movements
+  bool bitLocation(int,byte);
+  void GoStraight(int);
+  void GoBack(int);
+  void TurnRight(int);
+  void TurnLeft(int);
+  void Movement(int);
 	Encoder encoder;
 	double Acc_Limit = 0;
 	double MAX_Tick_Per_Rev = 0;

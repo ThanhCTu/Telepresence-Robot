@@ -10,9 +10,12 @@ String CommandOfTablet = "";
 String left = "";
 String right = "";
 char Received_Command;
+BUS bus = {0,true,false};
+int change_state_counter = 0;
 void setup() {
   
   Serial.begin(9600);
+
   
  TCCR1B = TCCR1B & 0b11111000 | 1;                   // set 31KHz PWM to prevent motor noise
   //Set up PID 
@@ -28,17 +31,21 @@ void setup() {
   Timer1.attachInterrupt( timer_interrupt);
   Serial.println(motor_right.MAX_Tick_Per_Rev);
   Serial.println("Ready");
-  motor_right.Speed(0,0);
+  motor_right.Speed(STOPPING);
+  motor_left.Speed(STOPPING);
 //*/
+  Serial.println("Ready");
+
+ bus.counter = ONE_SECOND/TIME_FRAME;
+ Serial.println(bus.counter);
 }
-float test = 0;
 void loop() {
   // put your main code here, to run repeatedly:
 
-
+    Rx_Command();
 
 //motor_right.Speed(2.2,2.2);
-  Read_Command();
+  //Read_Command();
   
   motor_right.Compute_PID(rightPID);
    //motor_left.Compute_PID(leftPID);
@@ -57,7 +64,25 @@ void timer_interrupt()
   motor_right.Calculate_Speed();
   
   //motor_left.Calculate_Speed();
+  change_state_counter++;
+  if(change_state_counter >= bus.counter)
+  {
+    change_state_counter = 0;
+    if(bus.curr_state == bus.prev_state)
+    {
+      //Stop the motor for safety
+      //Serial.println("Stop motor");
+      motor_right.Movement(STOPPING);
+      motor_left.Movement(STOPPING);
+    }
+    else
+    {
+      bus.curr_state = bus.prev_state;
+      //Serial.println("Still good");
+    }
+  }
 }
+/*
 void Read_Command()
 {
   if(Serial.available()>0)
@@ -97,5 +122,36 @@ void Read_Command()
     //Serial.println(right);
   }
   
+}
+//*/
+void Rx_Command()
+{
+  int TempValue = 0;
+  if(Serial.available())
+  {
+      while(Serial.available())
+    {
+      Received_Command = Serial.read();
+//      if(Received_Command=='e')
+//      {
+//        Serial.println("break");
+//        break;
+//      }
+      CommandOfTablet += Received_Command;  
+      delay(2);
+      
+    }
+    TempValue = CommandOfTablet.toInt();
+    bus.prev_state = not bus.curr_state;
+    Serial.print("curr: ");
+    Serial.print(bus.curr_state);
+    Serial.print("  prev: ");
+    Serial.println(bus.prev_state);
+    Serial.println(TempValue);
+    motor_right.Movement(TempValue);
+    motor_left.Movement(TempValue);
+    CommandOfTablet = "";
+  }
+ 
 }
 

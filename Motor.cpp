@@ -71,14 +71,14 @@ void Motor::Calculate_Speed()
 	Limit_Speed(encoder.Velocity,encoder.Pre_Velocity);
 	encoder.Pre_Velocity = encoder.Velocity;
   //Set the PWM
-	Set_Speed(output);
+	Write_PWM(output);
   
 
 	//Reset Position
 	encoder.Position = 0;
 
 }
-void Motor::Set_Speed(double Calculated_PID)
+void Motor::Write_PWM(double Calculated_PID)
 {
    //LImit Calculated PID
   current_speed = (int) current_speed + Calculated_PID;
@@ -103,19 +103,8 @@ void Motor::Compute_PID(PID myPID)
   myPID.Compute();
   //Serial.println(current_speed);
 }
-double Motor::Speed(double left, double right)
+double Motor::Speed(double velocity)
 {
-  double velocity = 0;
-  if(_motor)
-  {
-    //velocity = ( 2*linear*100 + LENGTH_OF_TWO_WHEELS * angular) / (2);//*WHEEL_RADIUS);
-      velocity = right*100;
-  }
-  else
-  {
-//    velocity = ( 2*linear*100 - LENGTH_OF_TWO_WHEELS * angular) / (2);//*WHEEL_RADIUS);
-      velocity = left*100;
-  }
   //Can limit the speed of robot when the robot goes backward ( maybe 1/2 forward speed)
   Direction(velocity);
 
@@ -149,7 +138,7 @@ void Motor::Direction(double velocity)
      digitalWrite(Pin._MotorEnable_1,HIGH);
      digitalWrite(Pin._MotorEnable_2,LOW);
   }
-  else
+  else if (velocity < 0)
   {
     digitalWrite(Pin._MotorEnable_1,LOW);
     digitalWrite(Pin._MotorEnable_2,HIGH);
@@ -162,4 +151,92 @@ void Motor::SetUpPID(PID &myPID)
   myPID.SetOutputLimits(-255, 255);
   
 }
+bool Motor::bitLocation(int Rx_Command, byte bit_number)
+{
+  return (bitRead(Rx_Command,bit_number));
+}
+void Motor::GoStraight(int Rx_Command)
+{
+  if(bitLocation(Rx_Command,FORWARD_BIT))
+  {
+    Speed(MAX_SPEED);
+  }
+}
+void Motor::GoBack(int Rx_Command)
+{
+  if(bitLocation(Rx_Command,BACKWARD_BIT))
+  {
+    Speed(MAX_SPEED * BACKWARD_LIMIT);
+  }
+  
+}
+void Motor::TurnRight(int Rx_Command)
+{
+  if(bitLocation(Rx_Command,RIGHT_BIT))
+  {
+    if(_motor)
+    {
+      if(bitLocation(Rx_Command,FORWARD_BIT))
+      {
+        //Speed(MAX_SPEED/2);
+        Write_PWM(255);
+        delay(5);
+        Speed(STOPPING);
+      }
+      else
+      {
+        Speed(STOPPING);
+      }
+      
+    }
+    else
+    {
+      Speed(MAX_SPEED);
+    }
+  }
+}
+void Motor::TurnLeft(int Rx_Command)
+{
+  if(bitLocation(Rx_Command,LEFT_BIT))
+  {
+    if(!(_motor))
+    {
+      if(bitLocation(Rx_Command,BACKWARD_LIMIT))
+      {
+        //Speed(MAX_SPEED/2);
+         Write_PWM(255);
+        delay(5);
+        Speed(STOPPING);
+      }
+      else
+      {
+        Speed(STOPPING);
+      }
+     
+    }
+    else
+    {
+      Speed(MAX_SPEED);
+    }
+  }
+}
+void Motor::Movement(int receveid_command)
+{
+
+   GoStraight(receveid_command);
+   GoBack(receveid_command);
+   TurnRight(receveid_command);
+   TurnLeft(receveid_command);
+   if(receveid_command == 0)
+     {
+        Speed(STOPPING);
+     }
+}
+
+
+
+
+
+
+
 

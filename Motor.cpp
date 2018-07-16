@@ -12,7 +12,7 @@ Motor::Motor() {
 	//Initialize struct
 	encoder = {0,0,0};
 	Pin = {0,0,0,0,0};
-  cmd = {0,0};
+	cmd = {0,0};
 
 }
 

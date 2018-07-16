@@ -1,5 +1,5 @@
 /*
- * Variables.h
+ * Variables.h 
  *
  *  Created on: Jun 16, 2018
  *      Author: Thanh Tu
@@ -8,6 +8,7 @@
 #ifndef VARIABLES_H_
 #define VARIABLES_H_
 //Motor A
+#define DEBUG 0
 #define encodPinA1        2
 #define encodPinB1        7
 #define Mo_A1             4
@@ -30,19 +31,21 @@
 #define LEFT_BIT          0
 #define STOPPING          0
 //Const variables
-#define ACC_MAX           100
-#define MAX_SPEED         1000
-#define WHEEL_RADIUS      12
+#define ACC_MAX           40
+#define MAX_SPEED         41 //40
+#define SPEED             41
+#define WHEEL_RADIUS      8
 #define SET_SPEED         1.0//WHEEL_RADIUS  //rps
 #define TICK_PER_REVOLUTION 250
-#define TIME_FRAME       50000                     //in us ( 100,000 us = 100 ms)
-#define KP                1     // 0.1
+#define TIME_FRAME       10000                     //in us ( 100,000 us = 100 ms)
+#define KP                2 //2 // 0.1
 #define KI                0
-#define KD                20    //2
+#define KD                1000 //1000   //2
 #define ONE_SECOND       1000000   //1s = 1,000,000 us
-#define LENGTH_OF_TWO_WHEELS    50 //units : centimeter  (the length of two wheels)
+#define LENGTH_OF_TWO_WHEELS    20 //units : centimeter  (the length of two wheels)
 //const double Max_Speed = 0.8;                              //Max Speed = 3 m/s => 3 puls/ms
-#define BACKWARD_LIMIT    -0.7
+#define BACKWARD_LIMIT    -1 //-0.7
+#define COMMANDCOUNTER 3
 struct BUS
 {
   int counter;

@@ -25,14 +25,20 @@ struct PIN
 		int _MotorEnable_2;
 		int _PWM_Pin;
 	};
-
+struct Command
+{
+  int PreComm;
+  int Counter;
+};
 class Motor 
 {
 public:
 	Motor();
 	virtual ~Motor();
 	void Compute_PID(PID);
-	void Calculate_Speed();
+	//void Calculate_Speed(PID,Motor*);
+  void SetOutputToPWM(PID);
+  //void Calculate_Speed();
 	void Interrupt();
 	void Limit_Speed(double,double);
 	void TickPerRevolution();
@@ -43,6 +49,9 @@ public:
   void Direction(double);
   void SetUpPID(PID &myPID);
 
+  void CheckMotors(Motor*);
+
+  void DifferentialDrive (double,int);
   //Movements
   bool bitLocation(int,byte);
   void GoStraight(int);
@@ -51,10 +60,13 @@ public:
   void TurnLeft(int);
   void Movement(int);
 	Encoder encoder;
+  Command cmd;
 	double Acc_Limit = 0;
 	double MAX_Tick_Per_Rev = 0;
 	int current_speed;
 	double input = 0, output = 0, setpoint = 0;
+  static long encoder_diff;
+  volatile long local_speed;
 private:
 
 	PIN Pin;

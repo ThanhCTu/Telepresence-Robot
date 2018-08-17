@@ -1,101 +1,79 @@
-#include "Motor.h"
-#include "Variables.h"
-#include "WString.h"
-Motor motor_right;
-Motor motor_left;
-PID rightPID(&motor_right.input,&motor_right.output,&motor_right.setpoint,KP,KD,KI,DIRECT);
-PID leftPID(&motor_left.input,&motor_left.output,&motor_left.setpoint,KP,KD,KI,DIRECT);
+/*
+   Robot.ino
 
-String CommandOfTablet = "";
-String left = "";
-String right = "";
-char Received_Command;
+    Created on: Jul 20, 2018
+        Author: Thanh Hoang
+*/
+
+#include "Variables.h"
+#include "TimerOne.h"
+#include "DifferentialDrive.h"
+
+DDrive d_drive;
+int stage = 0;
+
 void setup() {
-  
+  // establish Serial communication channel
   Serial.begin(9600);
   
- TCCR1B = TCCR1B & 0b11111000 | 1;                   // set 31KHz PWM to prevent motor noise
-  //Set up PID 
- 
-  motor_right.SetUpPID(rightPID);
-  //motor_left.SetUpPID(leftPID);  
+  // command rx LED
+  pinMode(LED_BUILTIN, OUTPUT);
   
-  motor_right.Begin(encodPinA1, encodPinB1, Mo_A1, Mo_A2, PWM_Control_Mo_A,Motor_Right);
-  //motor_left.Begin(encodPinA2,encodPinB2,Mo_B1 ,Mo_B2,PWM_Control_Mo_B,Motor_Left);
-  attachInterrupt(digitalPinToInterrupt(encodPinA1), isr, RISING);
-  //attachInterrupt(digitalPinToInterrupt(3), isrB, RISING);
-  Timer1.initialize( TIME_FRAME);
-  Timer1.attachInterrupt( timer_interrupt);
-  Serial.println(motor_right.MAX_Tick_Per_Rev);
-  Serial.println("Ready");
-  motor_right.Speed(0,0);
-//*/
+  // set 31KHz PWM to prevent motor noise
+  TCCR1B = TCCR1B & 0b11111000 | 1;
+
+  // setup pins for each motors
+  d_drive.SetRightMotorPins(encodPinA1, encodPinB1, Mo_A1, Mo_A2, PWM_Control_Mo_A);
+  d_drive.SetLeftMotorPins(encodPinA2, encodPinB2, Mo_B1 , Mo_B2, PWM_Control_Mo_B);
+
+  attachInterrupt(digitalPinToInterrupt(encodPinA1), RightMotorInterrupt, RISING);
+  attachInterrupt(digitalPinToInterrupt(encodPinA2), LeftMotorInterrupt, RISING);
+
+  // Timer1 for increase motor's speed smoothly
+  Timer1.initialize(TIMER_INTERVAL);
+  Timer1.attachInterrupt(TimerInterrupt);
 }
-float test = 0;
+
 void loop() {
-  // put your main code here, to run repeatedly:
+  RxCommand();
+}
 
+// Interrupt for measuring right motor's velocity
+void RightMotorInterrupt() {
+  d_drive.RightMotorInterrupt();
+}
 
+// Interrupt for measuring left motor's velocity
+void LeftMotorInterrupt() {
+  d_drive.LeftMotorInterrupt();
+}
 
-//motor_right.Speed(2.2,2.2);
-  Read_Command();
+// Timer interrupt function
+int time_counter = 0, flag = 0, code = 0x67;
+
+void TimerInterrupt() {
+
+  d_drive.TimerInterrupt();
   
-  motor_right.Compute_PID(rightPID);
-   //motor_left.Compute_PID(leftPID);
-  //*/
-}
-void isr()
-{
-  motor_right.Interrupt();
-}
-void isrB()
-{
-  motor_left.Interrupt();
-}
-void timer_interrupt()
-{
-  motor_right.Calculate_Speed();
-  
-  //motor_left.Calculate_Speed();
-}
-void Read_Command()
-{
-  if(Serial.available()>0)
-  {
-    while(Serial.available())
-    {
-      Received_Command = Serial.read();
-      if(Received_Command=='e')
-      {
-        Serial.println("break");
-        break;
-      }
-      Serial.println((int)Received_Command);
-      CommandOfTablet += Received_Command;
-      
-      delay(1);
-      
+  if (DEBUG) { // debug mode. toggle speed every 3s
+    d_drive.ParseCommand(code);
+    if (time_counter++ > 3 * ONE_SECOND / TIMER_INTERVAL) {
+      code = (!flag)?0xA7:0x67;
+      flag ^= 1;
+      time_counter = 0;
     }
-  
-    if(CommandOfTablet.length())
-    {
-      int _beg = CommandOfTablet.indexOf("l");
-      int _end = CommandOfTablet.indexOf("r");
-    
-      if( _beg != -1 && _end != -1)
-      {
-        left = CommandOfTablet.substring(_beg + 1, _end);
-        right = CommandOfTablet.substring(_end + 1, CommandOfTablet.length());
-      }
-       
-      motor_right.Speed(left.toDouble(),right.toDouble());
-    
-    }
-
-    CommandOfTablet = "";
-    //Serial.print(left);Serial.print("\t");
-    //Serial.println(right);
   }
-  
+}
+
+void RxCommand() {
+  unsigned char rx = 0x67;
+  while (Serial.available()==0){
+    Serial.read();
+    delay(1);
+  }
+  rx = Serial.read();
+  stage ^= 1;
+  digitalWrite(LED_BUILTIN, stage);
+  d_drive.ParseCommand(rx);
 }
 
